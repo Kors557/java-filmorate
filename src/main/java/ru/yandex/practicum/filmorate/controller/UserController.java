@@ -24,14 +24,18 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         user.setId(nextId++);
         users.put(user.getId(), user);
         log.info("Создан новый пользователь: {}", user);
         return user;
     }
 
-    @PutMapping("/{id}")
-    public User update(@PathVariable Long id, @Valid @RequestBody User updatedUser) {
+    @PutMapping
+    public User update(@Valid @RequestBody User updatedUser) {
+        Long id = updatedUser.getId();
         if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с ID = " + id + " не найден");
         }

@@ -6,7 +6,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +23,7 @@ public class UserTest {
         user.setEmail("test@example.com");
         user.setLogin("testLogin");
         user.setName("Test Name");
-        user.setBirthday(OffsetDateTime.now().minusYears(20));
+        user.setBirthday(LocalDate.now().minusYears(20));
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
@@ -56,7 +56,8 @@ public class UserTest {
     void futureBirthday() {
         User user = new User();
         user.setEmail("test@test.ru");
-        user.setBirthday(OffsetDateTime.now().plusYears(1));
+        user.setLogin("Test");
+        user.setBirthday(LocalDate.now().plusYears(1));
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 

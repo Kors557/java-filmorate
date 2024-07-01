@@ -6,7 +6,7 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 @Data
 public class User {
@@ -23,5 +23,9 @@ public class User {
     private String name;
 
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
-    private OffsetDateTime birthday;
+    private LocalDate birthday;
+
+    public String getDisplayName() {
+        return (name != null && !name.isBlank()) ? name : login;
+    }
 }
