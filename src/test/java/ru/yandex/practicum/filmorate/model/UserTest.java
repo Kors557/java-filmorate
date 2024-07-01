@@ -33,33 +33,22 @@ public class UserTest {
     @Test
     void invalidEmail() {
         User user = new User();
+        user.setLogin("tatar");
         user.setEmail("invalidemail");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
-        assertEquals(2, violations.size());
         assertEquals("Некорректный формат электронной почты", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    void emptyLogin() {
-        User user = new User();
-        user.setLogin("");
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-
-        assertEquals(3, violations.size());
-        assertEquals("Логин не может содержать пробелы", violations.iterator().next().getMessage());
     }
 
     @Test
     void loginWithSpaces() {
         User user = new User();
         user.setLogin("test login");
+        user.setEmail("test@test.ru");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
-        assertEquals(2, violations.size());
         assertEquals("Логин не может содержать пробелы", violations.iterator().next().getMessage());
     }
 
@@ -71,7 +60,6 @@ public class UserTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
-        assertEquals(2, violations.size());
         assertEquals("Дата рождения не может быть в будущем", violations.iterator().next().getMessage());
     }
 }

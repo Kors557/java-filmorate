@@ -44,6 +44,8 @@ public class FilmTest {
     @Test
     void descriptionTooLong() {
         Film film = new Film();
+        film.setName("Test");
+        film.setDuration(50);
         film.setDescription("Test description".repeat(15));
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
