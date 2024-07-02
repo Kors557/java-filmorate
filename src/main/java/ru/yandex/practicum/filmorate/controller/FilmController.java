@@ -36,7 +36,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@RequestBody Film newFilm) throws ValidationException {
+    public Film update(@Valid @RequestBody Film newFilm) throws ValidationException {
         if (newFilm.getId() == null) {
             log.warn("Попытка обновления фильма без указания ID");
             throw new ValidationException("ID должен быть указан");

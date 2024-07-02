@@ -24,8 +24,4 @@ public class User {
 
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
-
-    public String getDisplayName() {
-        return (name != null && !name.isBlank()) ? name : login;
-    }
 }
