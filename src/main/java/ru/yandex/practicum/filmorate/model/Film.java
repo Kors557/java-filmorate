@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Data
@@ -25,5 +27,15 @@ public class Film {
 
     public boolean isValidReleaseDate() {
         return releaseDate != null && !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
+    }
+
+    private Set<Long> likes = new HashSet<>();
+
+    public void addLike(Long userId) {
+        this.likes.add(userId);
+    }
+
+    public void removeLike(Long userId) {
+        this.likes.remove(userId);
     }
 }
