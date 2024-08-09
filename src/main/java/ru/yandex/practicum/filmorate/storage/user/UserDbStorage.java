@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -76,12 +76,14 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     @Override
     public User findById(Long id) {
         log.info("Getting user with id {}", id);
-        Optional<User> userOptional = findOne(FIND_USER_BY_ID_QUERY, id);
-        User user = userOptional.orElseThrow(() -> new EntityNotFoundException("User with ID=" + id + " not found"));
-        user.setFriends(getALLFriendsIds(id));
 
+        User user = findOne(FIND_USER_BY_ID_QUERY, id)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID=" + id + " not found"));
+
+        user.setFriends(getALLFriendsIds(id));
         return user;
     }
+
 
     @Override
     public User update(User user) {

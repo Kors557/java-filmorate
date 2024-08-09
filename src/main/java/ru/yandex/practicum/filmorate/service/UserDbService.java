@@ -2,7 +2,10 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
@@ -35,18 +38,26 @@ public class UserDbService {
     }
 
     public void addFriends(Long userId, Long friendId) {
-        log.info("Adding friend {} to user {}", friendId, userId);
-        userDbStorage.findById(userId);
-        User friend = userDbStorage.findById(friendId);
+        try {
+            log.info("Adding friend {} to user {}", friendId, userId);
 
-        String status = FRIEND_STATUS_UNCONFIRMED;
-        if (friend.getFriends().contains(userId)) {
-            log.info("User confirmed the friend request");
-            status = FRIEND_STATUS_CONFIRMED;
-            userDbStorage.updateFriendsStatus(friendId, userId, status);
+            userDbStorage.findById(userId);
+            User friend = userDbStorage.findById(friendId);
+
+            String status = FRIEND_STATUS_UNCONFIRMED;
+            if (friend.getFriends().contains(userId)) {
+                log.info("User confirmed the friend request");
+                status = FRIEND_STATUS_CONFIRMED;
+                userDbStorage.updateFriendsStatus(friendId, userId, status);
+            }
+            userDbStorage.addFriends(userId, friendId, status);
+
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
-        userDbStorage.addFriends(userId, friendId, status);
     }
+
+
 
     public void deleteFriends(Long userId, Long friendId) {
         log.info("Removing friend {} from user {}", friendId, userId);
