@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +39,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void update(Film updatedFilm) {
+    public Film update(Film updatedFilm) {
         Long id = updatedFilm.getId();
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с ID = " + id + " не найден");
         }
         films.put(id, updatedFilm);
         log.info("Фильм с ID {} обновлен", id);
+        return updatedFilm;
     }
 }

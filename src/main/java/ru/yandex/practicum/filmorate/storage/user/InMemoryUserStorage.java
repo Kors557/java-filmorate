@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,12 +37,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void update(User updatedUser) {
+    public User update(User updatedUser) {
         Long id = updatedUser.getId();
         if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с ID = " + id + " не найден");
         }
         users.put(id, updatedUser);
         log.info("Пользователь с ID {} обновлен: {}", id, updatedUser);
+        return updatedUser;
     }
 }
