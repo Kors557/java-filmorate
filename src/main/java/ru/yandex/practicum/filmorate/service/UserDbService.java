@@ -58,7 +58,6 @@ public class UserDbService {
     }
 
 
-
     public void deleteFriends(Long userId, Long friendId) {
         log.info("Removing friend {} from user {}", friendId, userId);
         userDbStorage.findById(userId);

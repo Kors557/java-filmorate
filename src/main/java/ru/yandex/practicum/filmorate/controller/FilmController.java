@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -46,13 +48,23 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void likeFilm(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.addLikeFilm(userId, id);
+    public ResponseEntity<Void> likeFilm(@PathVariable Long id, @PathVariable Long userId) {
+        try {
+            filmService.addLikeFilm(id, userId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void unlikeFilm(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.deleteLikeFromFilm(userId, id);
+    public ResponseEntity<Void> unlikeFilm(@PathVariable Long id, @PathVariable Long userId) {
+        try {
+            filmService.deleteLikeFromFilm(userId, id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
     }
 
     @GetMapping("/popular")

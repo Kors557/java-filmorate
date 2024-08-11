@@ -9,8 +9,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
@@ -23,7 +21,7 @@ import java.util.*;
 @Primary
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
-    private static final String FIND_ALL_FILMS_QUERY = "SELECT * FROM films ORDER BY film_id";
+    private static final String FIND_ALL_FILMS_QUERY = "SELECT * FROM films";
     private static final String FIND_FILM_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
     private static final String GET_LIKES_FILM_QUERY = """
             SELECT user_id
@@ -77,43 +75,25 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
 
     @Override
-    public Film save(@Valid Film film) {
-        Integer ratingId = null;
-
-        if (film.getMpa() != null) {
-            ratingId = mpaService.findMpaIdByName(film.getMpa().getName())
-                    .orElseGet(() -> {
-                        Mpa newMpa = mpaService.createMpa(film.getMpa());
-                        return newMpa.getId();
-                    });
+    public Film save(@Valid Film film) throws ValidationException {
+        log.info("Creating film: {}", film);
+        filmValidator.verifyFilmIsValid(film);
+        if (!film.isValidReleaseDate()) {
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
-
         long id = insert(
                 ADD_FILM_QUERY,
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                ratingId
+                film.getMpa().getId()
         );
+        film.getGenres().forEach(genre -> insertData(INSERT_GENRE_FILM_QUERY, id, genre.getId()));
         film.setId(id);
-
-        film.getGenres().forEach(genre -> {
-            Integer genreId = genreService.findGenreIdByName(genre.getName())
-                    .orElseGet(() -> {
-                        Genre newGenre = genreService.createGenre(genre);
-                        return newGenre.getId();
-                    });
-
-            insertData(INSERT_GENRE_FILM_QUERY, id, genreId);
-        });
-
-        if (ratingId != null) {
-            film.setMpa(mpaService.getMpaById(ratingId));
-        }
+        film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
         film.setGenres(genreService.getGenresForFilm(id));
-
-        log.info("Создан новый фильм с ID {}", film.getId());
+        log.info("Film created: {}", film);
         return film;
     }
 
@@ -121,14 +101,12 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Film findById(Long id) {
         log.info("Getting film with id {}", id);
-        return findOne(FIND_FILM_BY_ID_QUERY, id)
-                .map(film -> {
-                    film.setGenres(genreService.getGenresForFilm(film.getId()));
-                    film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
-                    film.setLikes(getUsersIdWhoLikeFilm(id));
-                    return film;
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Film with ID=" + id + " not found"));
+        Optional<Film> userOptional = findOne(FIND_FILM_BY_ID_QUERY, id);
+        Film film = userOptional.orElseThrow(() -> new EntityNotFoundException("Film with ID=" + id + " not found"));
+        film.setGenres(genreService.getGenresForFilm(film.getId()));
+        film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
+        film.setLikes(getUsersIdWhoLikeFilm(id));
+        return film;
     }
 
     @Override

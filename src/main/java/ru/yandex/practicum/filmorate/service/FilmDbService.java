@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
@@ -49,14 +48,6 @@ public class FilmDbService {
 
     public void addLikeFilm(long filmId, long userId) {
         log.info("Add like for film {} by the user {}", filmId, userId);
-        Film film = filmDbStorage.findById(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм с ID = " + filmId + " не найден");
-        }
-
-        if (userDbServiceImpl.getUserById(userId) == null) {
-            throw new NotFoundException("Пользователь с ID = " + userId + " не найден");
-        }
         userDbServiceImpl.getUserById(userId);
         filmDbStorage.findById(filmId);
         filmDbStorage.addLikeFilm(filmId, userId);
