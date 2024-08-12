@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.film;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,11 +19,10 @@ import java.util.List;
 @AllArgsConstructor
 public class FilmService {
 
-
     private final FilmStorage filmStorage;
     private UserStorage userStorage;
 
-    public void likeFilm(Long userId, Long filmId) {
+    public void likeFilm(Long userId, Long filmId) throws ValidationException {
         Film film = filmStorage.findById(filmId);
         if (film == null) {
             throw new NotFoundException("Фильм с ID = " + filmId + " не найден");
@@ -37,7 +36,7 @@ public class FilmService {
         filmStorage.update(film);
     }
 
-    public void unlikeFilm(Long userId, Long filmId) {
+    public void unlikeFilm(Long userId, Long filmId) throws ValidationException {
         Film film = filmStorage.findById(filmId);
         if (film == null) {
             throw new NotFoundException("Фильм с ID = " + filmId + " не найден");
@@ -69,7 +68,7 @@ public class FilmService {
         return filmStorage.save(film);
     }
 
-    public void update(Film updatedFilm) {
+    public void update(Film updatedFilm) throws ValidationException {
         filmStorage.update(updatedFilm);
     }
 }
