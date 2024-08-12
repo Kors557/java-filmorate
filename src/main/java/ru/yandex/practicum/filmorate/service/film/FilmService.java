@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.film;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,6 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class FilmService {
-
 
     private final FilmStorage filmStorage;
     private UserStorage userStorage;

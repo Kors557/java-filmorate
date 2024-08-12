@@ -17,29 +17,6 @@ import java.util.Set;
 @Repository
 @Primary
 public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
-    private static final String FIND_ALL_USERS_QUERY = "SELECT * FROM users ORDER BY user_id";
-    private static final String FIND_USER_BY_ID_QUERY = "SELECT * FROM users WHERE user_id = ?";
-    private static final String FIND_FRIENDS_QUERY = """
-            SELECT user2_id as user_id, email, login, name, birthday
-            FROM friendship
-            INNER JOIN users ON friendship.user2_id = users.user_id
-            WHERE friendship.user1_id = ?
-            """;
-    private static final String FIND_ALL_ID_FRIENDS_QUERY = "SELECT user2_id FROM friendship WHERE user1_id = ?";
-    private static final String INSERT_USER_QUERY = """
-            INSERT INTO USERS (EMAIL, LOGIN, NAME, BIRTHDAY)
-            VALUES (?, ?, ?, ?)
-            """;
-    private static final String UPDATE_USER_QUERY = """
-            UPDATE users SET email = ?, login = ?, name = ?, BIRTHDAY = ? WHERE user_id = ?
-            """;
-    private static final String INSERT_FRIEND_QUERY = """
-            INSERT INTO friendship (user1_id, user2_id, status) VALUES (?, ?, ?)
-            """;
-    private static final String UPDATE_FRIENDS_STATUS_QUERY = """
-            UPDATE friendship SET status = ? WHERE user1_id = ? AND user2_id = ?
-            """;
-    private static final String DELETE_FRIEND_QUERY = "DELETE FROM friendship WHERE user1_id = ? AND user2_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -48,7 +25,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     @Override
     public List<User> findAll() {
         log.info("Getting all users");
-        List<User> users = findMany(FIND_ALL_USERS_QUERY);
+        List<User> users = findMany(UserQueries.FIND_ALL_USERS);
         for (User user : users) {
             Set<Long> friendsIds = getALLFriendsIds(user.getId());
             user.setFriends(friendsIds);
@@ -61,7 +38,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
         log.info("Creating user: {}", user);
         checkingUserName(user);
         long id = insert(
-                INSERT_USER_QUERY,
+                UserQueries.INSERT_USER,
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
@@ -76,7 +53,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     public User findById(Long id) {
         log.info("Getting user with id {}", id);
 
-        User user = findOne(FIND_USER_BY_ID_QUERY, id)
+        User user = findOne(UserQueries.FIND_USER_BY_ID, id)
                 .orElseThrow(() -> new EntityNotFoundException("User with ID=" + id + " not found"));
 
         user.setFriends(getALLFriendsIds(id));
@@ -89,7 +66,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
         log.info("Updating user: {}", user);
         checkingUserName(user);
         update(
-                UPDATE_USER_QUERY,
+                UserQueries.UPDATE_USER,
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
@@ -102,26 +79,26 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     }
 
     public void addFriends(Long userId, Long friendId, String status) {
-        insertData(INSERT_FRIEND_QUERY, userId, friendId, status);
+        insertData(UserQueries.INSERT_FRIEND, userId, friendId, status);
         log.info("Adding friend {} to user {}", friendId, userId);
     }
 
     public void deleteFriends(Long userId, Long friendId) {
-        deleteTwoKeys(DELETE_FRIEND_QUERY, userId, friendId);
+        deleteTwoKeys(UserQueries.DELETE_FRIEND, userId, friendId);
         log.info("Removing friend {} from user {}", friendId, userId);
     }
 
     public List<User> getFriends(long id) {
         log.info("Getting user's friends {}", id);
-        return findMany(FIND_FRIENDS_QUERY, id);
+        return findMany(UserQueries.FIND_FRIENDS, id);
     }
 
     private Set<Long> getALLFriendsIds(long id) {
-        return new HashSet<>(findManyId(FIND_ALL_ID_FRIENDS_QUERY, id));
+        return new HashSet<>(findManyId(UserQueries.FIND_ALL_ID_FRIENDS, id));
     }
 
     public void updateFriendsStatus(Long userId, Long friendId, String status) {
-        insertData(UPDATE_FRIENDS_STATUS_QUERY, status, userId, friendId);
+        insertData(UserQueries.UPDATE_FRIENDS_STATUS, status, userId, friendId);
     }
 
     private void checkingUserName(User user) {

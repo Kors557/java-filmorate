@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserDbService;
+import ru.yandex.practicum.filmorate.service.user.UserDbService;
 
 import java.util.ArrayList;
 import java.util.Collection;

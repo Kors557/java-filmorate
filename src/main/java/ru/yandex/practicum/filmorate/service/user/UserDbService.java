@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,28 +15,33 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserDbService {
+public class UserDbService implements UserServiceInterface {
     private final UserDbStorage userDbStorage;
 
     private static final String FRIEND_STATUS_CONFIRMED = "confirmed";
     private static final String FRIEND_STATUS_UNCONFIRMED = "unconfirmed";
 
+    @Override
     public List<User> getAllUsers() {
         return userDbStorage.findAll();
     }
 
+    @Override
     public User getUserById(long id) {
         return userDbStorage.findById(id);
     }
 
+    @Override
     public User createUser(User requestUser) {
         return userDbStorage.save(requestUser);
     }
 
+    @Override
     public User updateUser(User user) {
         return userDbStorage.update(user);
     }
 
+    @Override
     public void addFriends(Long userId, Long friendId) {
         try {
             log.info("Adding friend {} to user {}", friendId, userId);
@@ -58,6 +63,7 @@ public class UserDbService {
     }
 
 
+    @Override
     public void deleteFriends(Long userId, Long friendId) {
         log.info("Removing friend {} from user {}", friendId, userId);
         userDbStorage.findById(userId);
@@ -67,11 +73,13 @@ public class UserDbService {
         userDbStorage.deleteFriends(userId, friendId);
     }
 
+    @Override
     public List<User> getFriends(long id) {
         userDbStorage.findById(id);
         return userDbStorage.getFriends(id);
     }
 
+    @Override
     public List<User> getListMutualFriends(Long userId, Long otherUserId) {
         log.info("Getting list for mutual friends {}", otherUserId);
         List<Long> otherUserList = new ArrayList<>(userDbStorage.findById(otherUserId).getFriends());
